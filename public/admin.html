@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Private Admin | Banshikha</title><link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<main class="page admin-page">
+<section class="page-head reveal visible">
+<p class="eyebrow">PRIVATE AREA</p><h1>Resume<br><span>requests.</span></h1>
+</section>
+<div class="admin-login">
+<label>Admin key</label>
+<input id="adminKey" type="password" placeholder="Enter your private admin key">
+<button class="btn primary" id="load">Open requests →</button>
+<p id="status" class="form-status"></p>
+</div>
+<section id="requests" class="admin-requests"></section>
+</main>
+<script>
+let key="";
+const status=document.getElementById("status");
+document.getElementById("load").onclick=async()=>{
+  key=document.getElementById("adminKey").value;
+  const r=await fetch("/api/admin/requests",{headers:{"x-admin-key":key}});
+  if(!r.ok){status.textContent="Invalid admin key.";return}
+  status.textContent="";
+  const data=await r.json();
+  render(data.requests);
+};
+function render(items){
+ const box=document.getElementById("requests");
+ box.innerHTML=items.length?items.map(x=>`
+ <article class="request-card">
+  <div><p class="tag">${x.status.toUpperCase()}</p><h2>${escapeHtml(x.name)}</h2>
+  <a href="mailto:${escapeAttr(x.email)}">${escapeHtml(x.email)}</a>
+  <p>${escapeHtml(x.message||"No message")}</p>
+  <small>${new Date(x.createdAt).toLocaleString()}</small></div>
+  <div class="request-actions">
+    ${x.status==="pending"?`<button class="btn primary" onclick="approve('${x.id}')">Approve</button><button class="btn ghost" onclick="deny('${x.id}')">Deny</button>`:""}
+    ${x.status==="approved"&&x.token?`<button class="btn ghost" onclick="copyLink('${x.token}')">Copy link</button>`:""}
+  </div>
+ </article>`).join(""):"<p class='paper'>No resume requests yet.</p>";
+}
+async function approve(id){
+ const r=await fetch("/api/admin/approve/"+id,{method:"POST",headers:{"x-admin-key":key}});
+ const d=await r.json(); if(d.ok){await navigator.clipboard.writeText(d.link);alert("Approved. Secure link copied. Send it to "+d.email);document.getElementById("load").click()}
+}
+async function deny(id){
+ await fetch("/api/admin/deny/"+id,{method:"POST",headers:{"x-admin-key":key}});
+ document.getElementById("load").click();
+}
+function copyLink(token){const link=location.origin+"/resume.html?token="+token;navigator.clipboard.writeText(link);alert("Link copied.");}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function escapeAttr(s){return String(s).replace(/"/g,"&quot;")}
+</script>
+</body></html>

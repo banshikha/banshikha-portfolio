@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Private Resume | Banshikha</title><link rel="stylesheet" href="/css/style.css"></head>
+<body><main class="resume-gate"><div class="gate-card"><p class="eyebrow">APPROVED ACCESS</p><h1>Your resume link is <span>valid.</span></h1><p>Loading the private resume viewer…</p><iframe id="resumeFrame" title="Banshikha resume"></iframe><a href="/" class="text-link">← Back to portfolio</a></div></main><script>
+const token = new URLSearchParams(location.search).get("token");
+if (!token) {
+  document.querySelector(".gate-card p:nth-of-type(2)").textContent = "No approval token was provided.";
+} else {
+  document.getElementById("resumeFrame").src = "/api/resume/" + encodeURIComponent(token);
+}
+</script></body></html>
