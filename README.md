@@ -97,3 +97,4 @@ GitHub: https://github.com/banshikha
 LinkedIn: https://www.linkedin.com/in/banshikha-kumari-970a6b303
 
 Email: banshikabn12@gmail.com
+Visuals: https://banshikha-portfolio.onrender.com/
